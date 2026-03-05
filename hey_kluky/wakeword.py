@@ -10,13 +10,15 @@ import time
 import typer
 from pydub import AudioSegment
 
+from hey_kluky.settings import settings
+
 app = typer.Typer()
 
 
-def trigger_api(audio_bytes: bytes):
+def trigger_api(audio_bytes: bytes, api_base_url: str):
     print(f"\n⚡ Wake word detected! Sending audio to API...")
     try:
-        api_url = "http://localhost:8000/trigger"
+        api_url = f"{api_base_url}/trigger"
 
         response = httpx.post(api_url, content=audio_bytes)
 
@@ -115,7 +117,15 @@ def main(
     noise_suppression: bool = typer.Option(
         False, help="Enable Speex noise suppression (Linux only)."
     ),
+    api_base_url: str = typer.Option(
+        f"http://localhost:{settings.PORT}",
+        "--api-base-url",
+        envvar="API_BASE_URL",
+        help="Base URL of the local API server (e.g. http://localhost:8000).",
+    ),
 ):
+    api_base_url = api_base_url.rstrip("/")
+
     print("Loading models... (this might take a moment first time)")
     openwakeword.utils.download_models(model_names=[model_name])
 
@@ -142,13 +152,13 @@ def main(
             for m_name, score in prediction.items():
                 if score > threshold:
                     try:
-                        httpx.post("http://localhost:8000/stop-tts", timeout=1)
+                        httpx.post(f"{api_base_url}/stop-tts", timeout=1)
                     except Exception:
                         pass  # Server might not be running yet
                     audio_bytes = record_until_silence(
                         recorder, silence_timeout, max_duration
                     )
-                    trigger_api(audio_bytes)
+                    trigger_api(audio_bytes, api_base_url)
                     model.reset()
                     print(
                         f"🎤 Listening for '{model_name}' locally... (Ctrl+C to stop)"

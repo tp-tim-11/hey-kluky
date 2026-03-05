@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from hey_kluky.config import config
+from hey_kluky.settings import settings
 
 app = FastAPI(title="Whisper Transcription Server")
 
@@ -19,11 +19,11 @@ from hey_kluky.server import routes  # noqa: E402, F401
 
 
 def run():
-    if not config.validate():
+    if not settings.validate():
         print("Warning: Server starting without valid API key configuration")
 
     uvicorn.run(
         app,
-        host=config.HOST,
-        port=config.PORT,
+        host=settings.HOST,
+        port=settings.PORT,
     )

@@ -2,7 +2,7 @@ import json
 
 import anthropic
 
-from hey_kluky.config import config
+from hey_kluky.settings import settings
 
 _client: anthropic.Anthropic | None = None
 
@@ -28,7 +28,7 @@ No other text."""
 def _get_client() -> anthropic.Anthropic:
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+        _client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
     return _client
 
 

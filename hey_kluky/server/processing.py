@@ -6,23 +6,23 @@ from pathlib import Path
 from fastapi import HTTPException
 from openai import OpenAI
 
-from hey_kluky.config import config
+from hey_kluky.settings import settings
 from hey_kluky.tts import speak
 from hey_kluky.classifiers import classify
 from hey_kluky.server import state
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 SDK_SCRIPT = _PROJECT_ROOT / "opencode-sdk" / "index.js"
-TEST_OPENCODE_DIR = (_PROJECT_ROOT / config.TEST_OPENCODE_DIR).resolve()
+TEST_OPENCODE_DIR = (_PROJECT_ROOT / settings.TEST_OPENCODE_DIR).resolve()
 
 
 def get_openai_client() -> OpenAI:
-    if not config.OPENAI_API_KEY:
+    if not settings.OPENAI_API_KEY:
         raise HTTPException(status_code=500, detail="OpenAI API key not configured")
 
-    kwargs = {"api_key": config.OPENAI_API_KEY}
-    if config.OPENAI_API_BASE:
-        kwargs["base_url"] = config.OPENAI_API_BASE
+    kwargs = {"api_key": settings.OPENAI_API_KEY}
+    if settings.OPENAI_API_BASE:
+        kwargs["base_url"] = settings.OPENAI_API_BASE
 
     return OpenAI(**kwargs)
 
@@ -65,9 +65,11 @@ def _process_text(text: str) -> dict:
                 print(f"📋 SDK Logs:\n{result.stderr}")
 
             if result.returncode == 0:
-                stdout_lines = [line for line in result.stdout.strip().split('\n') if line.strip()]
+                stdout_lines = [
+                    line for line in result.stdout.strip().split("\n") if line.strip()
+                ]
                 if stdout_lines and stdout_lines[0].startswith("SESSION:"):
-                    state.active_session_id = stdout_lines[0][len("SESSION:"):]
+                    state.active_session_id = stdout_lines[0][len("SESSION:") :]
                     print(f"📌 Active session: {state.active_session_id}")
 
                 if intent == "new_session":
@@ -81,10 +83,18 @@ def _process_text(text: str) -> dict:
             sdk_result = f"SDK Error: {str(sdk_error)}"
             print(f"❌ SDK Error: {sdk_error}")
 
-        if sdk_result and not sdk_result.startswith("Error:") and not sdk_result.startswith("SDK Error:"):
+        if (
+            sdk_result
+            and not sdk_result.startswith("Error:")
+            and not sdk_result.startswith("SDK Error:")
+        ):
             threading.Thread(target=speak, args=(sdk_result,), daemon=True).start()
 
-        return {"intent": intent, "session_id": state.active_session_id, "sdk_result": sdk_result}
+        return {
+            "intent": intent,
+            "session_id": state.active_session_id,
+            "sdk_result": sdk_result,
+        }
 
     # Normal branch: forward text to SDK
     sdk_result = None
@@ -107,12 +117,14 @@ def _process_text(text: str) -> dict:
             print(f"📋 SDK Logs:\n{result.stderr}")
 
         if result.returncode == 0:
-            stdout_lines = [line for line in result.stdout.strip().split('\n') if line.strip()]
+            stdout_lines = [
+                line for line in result.stdout.strip().split("\n") if line.strip()
+            ]
 
             new_session_id = None
             response_lines = stdout_lines
             if stdout_lines and stdout_lines[0].startswith("SESSION:"):
-                new_session_id = stdout_lines[0][len("SESSION:"):]
+                new_session_id = stdout_lines[0][len("SESSION:") :]
                 response_lines = stdout_lines[1:]
 
             if new_session_id:
@@ -128,7 +140,15 @@ def _process_text(text: str) -> dict:
         sdk_result = f"SDK Error: {str(sdk_error)}"
         print(f"❌ SDK Error: {sdk_error}")
 
-    if sdk_result and not sdk_result.startswith("Error:") and not sdk_result.startswith("SDK Error:"):
+    if (
+        sdk_result
+        and not sdk_result.startswith("Error:")
+        and not sdk_result.startswith("SDK Error:")
+    ):
         threading.Thread(target=speak, args=(sdk_result,), daemon=True).start()
 
-    return {"intent": intent, "session_id": state.active_session_id, "sdk_result": sdk_result}
+    return {
+        "intent": intent,
+        "session_id": state.active_session_id,
+        "sdk_result": sdk_result,
+    }

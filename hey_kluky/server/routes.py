@@ -1,10 +1,14 @@
 import sounddevice as sd
 from fastapi import HTTPException, Request
 
-from hey_kluky.config import config
+from hey_kluky.settings import settings
 from hey_kluky.server import app
 from hey_kluky.server.models import TestRequest, TestResponse, TriggerResponse
-from hey_kluky.server.processing import bytes_to_audio_file, get_openai_client, _process_text
+from hey_kluky.server.processing import (
+    bytes_to_audio_file,
+    get_openai_client,
+    _process_text,
+)
 
 
 @app.post("/trigger", response_model=TriggerResponse)
@@ -23,9 +27,9 @@ async def trigger_endpoint(request: Request):
 
         try:
             transcription = client.audio.transcriptions.create(
-                model=config.WHISPER_MODEL,
+                model=settings.WHISPER_MODEL,
                 file=audio_file,
-                language=config.WHISPER_LANGUAGE,
+                language=settings.WHISPER_LANGUAGE,
             )
             print(f"✅ Transcription received: {transcription.text}")
         except Exception as whisper_error:
@@ -80,4 +84,4 @@ async def stop_tts():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "api_key_configured": bool(config.OPENAI_API_KEY)}
+    return {"status": "healthy", "api_key_configured": bool(settings.OPENAI_API_KEY)}
