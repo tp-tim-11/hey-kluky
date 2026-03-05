@@ -1,0 +1,13 @@
+{
+  "name": "opencode-sdk",
+  "version": "1.0.0",
+  "description": "SDK wrapper for OpenCode server integration",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@opencode-ai/sdk": "^1.0.0"
+  }
+}
