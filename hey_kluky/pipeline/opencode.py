@@ -5,10 +5,11 @@ from hey_kluky.config import config
 
 def create_session() -> str:
     with httpx.Client(base_url=config.OPENCODE_URL, timeout=30) as client:
-        response = client.post("/session", json={"title": "Voice Session"})
+        response = client.post("/session", json={"title": "Test Text session"})
         response.raise_for_status()
         data = response.json()
         print(f"[DEBUG] create_session response: {data}")
+        httpx.post(f"{config.OPENCODE_URL}/tui/select-session", json={"sessionID": data["id"]})
         return data["id"]
 
 
