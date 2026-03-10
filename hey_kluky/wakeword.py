@@ -19,18 +19,18 @@ def init_wakeword(
     print("Loading models... (this might take a moment first time)")
     openwakeword.utils.download_models(model_names=[model_name])
 
-    model = Model(
-        wakeword_models=[model_name],
-        vad_threshold=ww_vad_threshold if ww_vad_threshold > 0 else None,
-        enable_speex_noise_suppression=noise_suppression,
-    )
-
     # model = Model(
-    #     wakeword_models=["path/to/hey_Klooky.tflite"],
-    #     inference_framework="tflite",
+    #     wakeword_models=[model_name],
     #     vad_threshold=ww_vad_threshold if ww_vad_threshold > 0 else None,
     #     enable_speex_noise_suppression=noise_suppression,
     # )
+
+    model = Model(
+        wakeword_models=["wakeword_model/hey_Klooky.tflite"],
+        inference_framework="tflite",
+        vad_threshold=ww_vad_threshold if ww_vad_threshold > 0 else None,
+        enable_speex_noise_suppression=noise_suppression,
+    )
 
     recorder = PvRecorder(device_index=-1, frame_length=1280)
     recorder.start()
