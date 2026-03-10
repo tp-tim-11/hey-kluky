@@ -1,10 +1,9 @@
 from openai import OpenAI
 import sounddevice as sd
 import numpy as np
-import io
-import soundfile as sf
 
 client = OpenAI(base_url="http://localhost:8880/v1", api_key="not-needed")
+
 
 def speak(text: str):
     with client.audio.speech.with_streaming_response.create(
@@ -20,3 +19,7 @@ def speak(text: str):
         audio = np.frombuffer(buffer, dtype=np.int16).astype(np.float32) / 32768.0
         sd.play(audio, samplerate=24000)
         sd.wait()
+
+
+def stop():
+    sd.stop()
