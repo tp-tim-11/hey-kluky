@@ -17,7 +17,7 @@ def init_wakeword(
     noise_suppression: bool = False,
 ) -> tuple[PvRecorder, Model]:
     print("Loading models... (this might take a moment first time)")
-    openwakeword.utils.download_models(model_names=[model_name])
+    # openwakeword.utils.download_models(model_names=[model_name])
 
     # model = Model(
     #     wakeword_models=[model_name],
@@ -63,7 +63,7 @@ def wait_for_wakeword(
 def record_until_silence(
     recorder: PvRecorder, silence_timeout: float, max_duration: float
 ) -> bytes:
-    print(f"\U0001f534 Recording... (Speak now, will stop after {silence_timeout}s of silence)")
+    print(f"Recording... (Speak now, will stop after {silence_timeout}s of silence)")
     frames = []
 
     vad = VAD()
@@ -87,11 +87,11 @@ def record_until_silence(
         total_duration = current_time - start_time
 
         if silence_duration > silence_timeout:
-            print(f"\u23f9\ufe0f  Silence detected ({silence_duration:.1f}s). Stopping.")
+            print(f"Silence detected ({silence_duration:.1f}s). Stopping.")
             break
 
         if total_duration > max_duration:
-            print(f"\u23f9\ufe0f  Max duration reached ({max_duration}s). Stopping.")
+            print(f"Max duration reached ({max_duration}s). Stopping.")
             break
 
     audio_data = np.array(frames, dtype=np.int16).tobytes()
@@ -107,5 +107,5 @@ def record_until_silence(
     audio_segment.export(wav_buffer, format="wav")
     wav_bytes = wav_buffer.getvalue()
 
-    print(f"\U0001f50a Recorded {len(frames)} frames ({len(wav_bytes)} bytes)")
+    print(f"Recorded {len(frames)} frames ({len(wav_bytes)} bytes)")
     return wav_bytes

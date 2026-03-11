@@ -16,6 +16,7 @@ class Config:
     OPENCODE_PROVIDER_ID: str = os.getenv("OPENCODE_PROVIDER_ID", "github-copilot")
     API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
     API_PORT: int = int(os.getenv("API_PORT", "8321"))
+    WAKEWORD_MODEL_NAME: str = os.getenv("WAKEWORD_MODEL_NAME", "hey_kluky")
 
     @classmethod
     def validate(cls) -> bool:
