@@ -41,7 +41,7 @@ def speak(req: SpeakRequest):
     return {"status": "ok"}
 
 
-@v1.get("/new-session")
+@v1.get("/new_session")
 def new_session():
     """Create a new opencode session. The orchestrator will pick up the new ID."""
     global _pending_session_id
