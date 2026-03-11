@@ -8,7 +8,7 @@ class Config:
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENAI_API_BASE: str = os.getenv("OPENAI_API_BASE", "")
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
-    WHISPER_MODEL: str = os.getenv("WHISPER_MODEL", "whisper-1")
+    WHISPER_MODEL: str = os.getenv("WHISPER_MODEL", "whisper-fiit")
     WHISPER_LANGUAGE: str = os.getenv("WHISPER_LANGUAGE", "sk")
     TEST_OPENCODE_DIR: str = os.getenv("TEST_OPENCODE_DIR", "./test_opencode")
     OPENCODE_URL: str = os.getenv("OPENCODE_URL", "http://localhost:4096")
