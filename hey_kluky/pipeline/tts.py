@@ -1,24 +1,28 @@
-from openai import OpenAI
+from elevenlabs.client import ElevenLabs
 import sounddevice as sd
-import numpy as np
+import soundfile as sf
+from io import BytesIO
 
-client = OpenAI(base_url="http://localhost:8880/v1", api_key="not-needed")
+from ..config import (
+    ELEVENLABS_API_KEY,
+    ELEVENLABS_VOICE_ID,
+    ELEVENLABS_MODEL_ID
+)
+
+client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
 
 
 def speak(text: str):
-    with client.audio.speech.with_streaming_response.create(
-        model="kokoro",
-        voice="af_sky+af_bella",
-        input=text,
-        response_format="pcm",
-    ) as response:
-        buffer = b""
-        for chunk in response.iter_bytes(chunk_size=4096):
-            buffer += chunk
-
-        audio = np.frombuffer(buffer, dtype=np.int16).astype(np.float32) / 32768.0
-        sd.play(audio, samplerate=24000)
-        sd.wait()
+    audio_generator = client.text_to_speech.convert(
+        text=text,
+        voice_id=ELEVENLABS_VOICE_ID,
+        model_id=ELEVENLABS_MODEL_ID,
+        output_format="mp3_44100_128",
+    )
+    audio_bytes = b"".join(audio_generator)
+    samples, samplerate = sf.read(BytesIO(audio_bytes))
+    sd.play(samples, samplerate=samplerate)
+    sd.wait()
 
 
 def stop():

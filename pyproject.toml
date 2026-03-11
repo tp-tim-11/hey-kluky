@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "hey-kluky"
 version = "0.1.0"
@@ -17,6 +21,7 @@ dependencies = [
     "soundfile>=0.13.1",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.34.0",
+    "elevenlabs>=2.38.1",
 ]
 
 [project.scripts]
@@ -28,3 +33,6 @@ dev = [
     "ruff>=0.14.6",
     "ty>=0.0.1a28",
 ]
+
+[tool.setuptools.packages.find]
+include = ["hey_kluky*"]
