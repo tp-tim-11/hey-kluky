@@ -1,4 +1,5 @@
 import io
+import os
 import subprocess
 import threading
 from pathlib import Path
@@ -14,6 +15,13 @@ from hey_kluky.server import state
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 SDK_SCRIPT = _PROJECT_ROOT / "opencode-sdk" / "index.js"
 TEST_OPENCODE_DIR = (_PROJECT_ROOT / settings.TEST_OPENCODE_DIR).resolve()
+
+
+def _sdk_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["OPENCODE_PROVIDER_ID"] = settings.OPENCODE_PROVIDER_ID
+    env["OPENCODE_MODEL_ID"] = settings.OPENCODE_MODEL_ID
+    return env
 
 
 def get_openai_client() -> OpenAI:
@@ -58,6 +66,7 @@ def _process_text(text: str) -> dict:
                 timeout=30,
                 cwd=str(_PROJECT_ROOT),
                 encoding="utf-8",
+                env=_sdk_env(),
             )
             if result.stdout:
                 print(f"📤 SDK Output:\n{result.stdout}")
@@ -110,6 +119,7 @@ def _process_text(text: str) -> dict:
             timeout=180,
             cwd=str(_PROJECT_ROOT),
             encoding="utf-8",
+            env=_sdk_env(),
         )
         if result.stdout:
             print(f"📤 SDK Output:\n{result.stdout}")

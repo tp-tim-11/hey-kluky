@@ -1,6 +1,8 @@
 import { createOpencodeClient } from "@opencode-ai/sdk";
 
 const OPENCODE_URL = process.env.OPENCODE_URL || "http://localhost:4096";
+const OPENCODE_PROVIDER_ID = process.env.OPENCODE_PROVIDER_ID || "github-copilot";
+const OPENCODE_MODEL_ID = process.env.OPENCODE_MODEL_ID || "gpt-4.1";
 
 let client = null;
 
@@ -34,7 +36,7 @@ async function sendContext(text, testDir, sessionId) {
     url: `/session/${sessionId}/message`,
     body: {
       directory: testDir,
-      model: { providerID: "github-copilot", modelID: "gpt-4.1" },
+      model: { providerID: OPENCODE_PROVIDER_ID, modelID: OPENCODE_MODEL_ID },
       mode: "plan",
       parts: [{ type: "text", text }],
     },

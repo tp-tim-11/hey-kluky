@@ -15,12 +15,12 @@ from hey_kluky.settings import settings
 app = typer.Typer()
 
 
-def trigger_api(audio_bytes: bytes, api_base_url: str):
+def trigger_api(audio_bytes: bytes, api_base_url: str, api_timeout: float):
     print(f"\n⚡ Wake word detected! Sending audio to API...")
     try:
         api_url = f"{api_base_url}/trigger"
 
-        response = httpx.post(api_url, content=audio_bytes)
+        response = httpx.post(api_url, content=audio_bytes, timeout=api_timeout)
 
         if response.status_code == 200:
             result = response.json()
@@ -35,6 +35,8 @@ def trigger_api(audio_bytes: bytes, api_base_url: str):
                 print("✅ API Request Sent")
         else:
             print(f"❌ API Error: HTTP {response.status_code}")
+    except httpx.TimeoutException:
+        print(f"❌ API Error: /trigger timed out after {api_timeout:.1f}s")
     except Exception as e:
         print(f"❌ API Error: {e}")
 
@@ -123,6 +125,11 @@ def main(
         envvar="API_BASE_URL",
         help="Base URL of the local API server (e.g. http://localhost:8000).",
     ),
+    api_timeout: float = typer.Option(
+        120.0,
+        "--api-timeout",
+        help="Timeout in seconds for /trigger API call.",
+    ),
 ):
     api_base_url = api_base_url.rstrip("/")
 
@@ -140,7 +147,7 @@ def main(
 
     print(f"🎤 Listening for '{model_name}' locally... (Ctrl+C to stop)")
     if ww_vad_threshold > 0:
-        print("\t(VAD Enabled: threshold={ww_vad_threshold})")
+        print(f"\t(VAD Enabled: threshold={ww_vad_threshold})")
     if noise_suppression:
         print("\t(Noise Suppression Enabled)")
 
@@ -158,7 +165,7 @@ def main(
                     audio_bytes = record_until_silence(
                         recorder, silence_timeout, max_duration
                     )
-                    trigger_api(audio_bytes, api_base_url)
+                    trigger_api(audio_bytes, api_base_url, api_timeout)
                     model.reset()
                     print(
                         f"🎤 Listening for '{model_name}' locally... (Ctrl+C to stop)"

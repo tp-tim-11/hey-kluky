@@ -2,6 +2,7 @@
 nul
 server.err
 opencode-sdk/node_modules/
+Kokoro-FastAPI/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

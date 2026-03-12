@@ -11,7 +11,13 @@ class Settings(BaseSettings):
     WHISPER_LANGUAGE: str = "en"
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    OPENCODE_PROVIDER_ID: str = "github-copilot"
+    OPENCODE_MODEL_ID: str = "gpt-4.1"
     TEST_OPENCODE_DIR: str = ""
+
+    @property
+    def use_local_classifier(self) -> bool:
+        return self.ANTHROPIC_API_KEY.strip() == ""
 
     def validate(self) -> bool:
         if not self.OPENAI_API_KEY:

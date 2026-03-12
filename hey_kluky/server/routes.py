@@ -1,5 +1,9 @@
-import sounddevice as sd
 from fastapi import HTTPException, Request
+
+try:
+    import sounddevice as sd
+except Exception:
+    sd = None
 
 from hey_kluky.settings import settings
 from hey_kluky.server import app
@@ -78,7 +82,8 @@ async def test_endpoint(body: TestRequest):
 
 @app.post("/stop-tts")
 async def stop_tts():
-    sd.stop()
+    if sd is not None:
+        sd.stop()
     return {"success": True}
 
 

@@ -1,8 +1,8 @@
-import os
+from hey_kluky.settings import settings
 
 # Use local keyword-based classifier by default (no API key needed).
-# Set USE_LOCAL_CLASSIFIER=false in .env to use the LLM classifier instead.
-if os.environ.get("USE_LOCAL_CLASSIFIER", "true").lower() != "false":
+# If ANTHROPIC_API_KEY is set, switch to the LLM classifier.
+if settings.use_local_classifier:
     from hey_kluky.classifiers.local import classify
 else:
     from hey_kluky.classifiers.llm import classify
