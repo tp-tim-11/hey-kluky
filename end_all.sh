@@ -66,7 +66,7 @@ stop_pid_from_file() {
 
   if pid_running "$pid"; then
     echo "Stopping $label (pid $pid)..."
-    kill "$pid" 2>/dev/null || true
+    kill -TERM "$pid" 2>/dev/null || true
 
     for _ in {1..30}; do
       if ! pid_running "$pid"; then

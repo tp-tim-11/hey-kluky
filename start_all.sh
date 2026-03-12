@@ -168,7 +168,7 @@ cleanup() {
   if [[ "$OPENCODE_STARTED" -eq 1 && -n "$OPENCODE_PID" ]] && pid_running "$OPENCODE_PID"; then
     echo
     echo "Stopping OpenCode server (pid $OPENCODE_PID)..."
-    kill "$OPENCODE_PID" 2>/dev/null || true
+    kill -TERM "$OPENCODE_PID" 2>/dev/null || true
     for _ in {1..30}; do
       if ! pid_running "$OPENCODE_PID"; then
         break
@@ -188,11 +188,17 @@ trap cleanup EXIT INT TERM
 echo "Ensuring OpenCode server on ${OPENCODE_HOST}:${OPENCODE_PORT}"
 if is_listening "$OPENCODE_PORT"; then
   echo "OpenCode already listening on $OPENCODE_PORT, reusing."
-  rm -f "$OPENCODE_PID_FILE"
+  if [[ -f "$OPENCODE_PID_FILE" ]]; then
+    existing_pid="$(tr -d '[:space:]' < "$OPENCODE_PID_FILE" || true)"
+    if [[ -z "$existing_pid" ]] || ! pid_running "$existing_pid"; then
+      rm -f "$OPENCODE_PID_FILE"
+      echo "Removed stale OpenCode PID file."
+    fi
+  fi
 else
   (
     cd "$TEST_OPENCODE_DIR"
-    opencode serve --hostname "$OPENCODE_HOST" --port "$OPENCODE_PORT" --print-logs \
+    exec opencode serve --hostname "$OPENCODE_HOST" --port "$OPENCODE_PORT" --print-logs \
       > "$OPENCODE_LOG_FILE" 2>&1
   ) &
   OPENCODE_PID="$!"
