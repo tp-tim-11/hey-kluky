@@ -1,115 +1,122 @@
 # hey-kluky
 
-`hey-kluky` is a wake word detection tool powered by [OpenWakeWord](https://github.com/dscripka/openWakeWord). It listens for a specific wake word (default: "hey_jarvis") and triggers an API endpoint when detected.
+`hey-kluky` is a wake-word voice assistant loop:
 
-## Prerequisites
+1. wait for wake word
+2. record audio
+3. transcribe with OpenAI Whisper
+4. send text to an OpenCode server session
+
+The app entrypoint is `main.py`.
+
+## Current prerequisites
 
 - `uv`
-- `node` + `npm`
 - `opencode` CLI
-- `docker` (for Kokoro TTS)
+- Linux audio dependencies for `sounddevice`/microphone access
+- Python `3.11` (important: `tflite-runtime` used by `openwakeword` does not currently install on `3.13`)
 
 ## Environment
 
-Copy `.env-example` to `.env` and fill the required values:
+Copy `.env-example` to `.env`:
 
 ```bash
 cp .env-example .env
 ```
 
-`server.py` reads `.env` through `hey_kluky/settings.py`.
-
 Required:
 
 - `OPENAI_API_KEY`
+- `TEST_OPENCODE_DIR` (directory OpenCode should use for context/execution)
 
-Optional (depending on setup):
+Common optional values:
 
 - `OPENAI_API_BASE`
-- `ANTHROPIC_API_KEY` (if set, Anthropic intent classifier is used; if empty, local keyword classifier is used)
-- `OPENCODE_PROVIDER_ID` and `OPENCODE_MODEL_ID` (defaults: `github-copilot` / `gpt-4.1`)
+- `OPENCODE_URL` (default: `http://localhost:4096`)
+- `OPENCODE_PROVIDER_ID` and `OPENCODE_MODEL_ID`
+- `API_HOST`, `API_PORT`
+- `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL_ID`
 
-## Run the full app
+## One-time model download (openwakeword assets)
 
-Use `start-all.sh` to launch all dependencies in order:
-
-1. Kokoro TTS (Docker)
-2. OpenCode server
-3. Python API server (`server.py`)
-4. Wakeword listener (`main.py`)
+If you see missing model files such as `silero_vad.onnx`, run:
 
 ```bash
-chmod +x start-all.sh
-./start-all.sh --test-dir /absolute/path/to/target/project
+uv run python -c "import openwakeword.utils as u; u.download_models()"
 ```
 
-If you want to override `.env` for one run, pass vars inline:
+## Start everything with scripts
+
+This repo now provides `start_all.sh` and `end_all.sh`.
 
 ```bash
-OPENAI_API_KEY=... ./start-all.sh --test-dir /absolute/path/to/target/project
+chmod +x start_all.sh end_all.sh
+./start_all.sh
+```
+
+`start_all.sh` does:
+
+1. loads settings from `.env` through `hey_kluky/config.py` (pydantic-settings)
+2. validates `TEST_OPENCODE_DIR`
+3. starts `opencode serve` (or reuses existing server on `OPENCODE_URL` port)
+4. runs `uv run python main.py` in foreground (live logs in your terminal)
+
+Logs:
+
+- `.run/opencode.log`
+
+`start_all.sh` does not accept CLI options. Configure `.env` instead.
+
+Stop managed OpenCode process from PID file:
+
+```bash
+./end_all.sh
+```
+
+## Manual run (without helper scripts)
+
+Terminal 1 (in target project directory):
+
+```bash
+opencode serve --hostname 127.0.0.1 --port 4096
+```
+
+Terminal 2 (this repo):
+
+```bash
+TEST_OPENCODE_DIR=/absolute/path/to/target/project uv run main.py
+```
+
+If OpenCode runs elsewhere:
+
+```bash
+OPENCODE_URL=http://127.0.0.1:4097 TEST_OPENCODE_DIR=/absolute/path uv run main.py
+```
+
+## CLI options
+
+Show all options:
+
+```bash
+uv run python main.py --help
 ```
 
 Common options:
 
-- `--test-dir PATH`: directory sent to OpenCode SDK as working context (required)
-- `--opencode-dir PATH`: directory where `opencode serve` is started (default: same as `--test-dir`)
-- `--server-port N`: Python API port (default: `8000`)
-- `--opencode-port N`: OpenCode server port (default: `4096`)
-- `--kokoro cpu|gpu|skip`: start CPU, GPU, or skip Kokoro startup
-- `--skip-install`: skip `uv sync` and `npm ci`
+- `--text`: run one text request (skip wakeword + recording)
+- `--threshold`: wakeword confidence threshold
+- `--silence-timeout`: stop recording after silence seconds
+- `--max-duration`: cap recording duration
+- `--ww-vad-threshold`: wakeword VAD threshold (`0` disables VAD)
+- `--api-host`, `--api-port`: internal FastAPI server used by the app
 
-Pass wakeword CLI options after `--`:
+## Troubleshooting
 
-```bash
-./start-all.sh --test-dir /abs/path -- --model-name hey_jarvis --threshold 0.55
-```
-
-Custom API port example:
-
-```bash
-./start-all.sh --test-dir /abs/path --server-port 8010
-```
-
-`start-all.sh` sets `API_BASE_URL` automatically so wakeword uses the same API port.
-
-Logs are written to `.run/server.log` and `.run/opencode.log`.
-
-Stop everything started by the launcher:
-
-```bash
-chmod +x stop-all.sh
-./stop-all.sh
-```
-
-## Wakeword CLI usage
-
-You can run the CLI tool using Python. Ensure you have the dependencies installed.
-
-### Custom Configuration
-You can customize the behavior using command-line options:
-
-- **--model-name**: The wake word model to use (e.g., `alexa`, `hey_mycroft`, `hey_jarvis`).
-- **--threshold**: The confidence threshold (0.0 to 1.0). Higher values reduce false positives but might miss some detections.
-- **--silence-timeout**: Seconds of silence to stop recording (default: 1.0).
-- **--max-duration**: Maximum recording duration in seconds (default: 30.0).
-- **--ww-vad-threshold**: VAD threshold for wake word detection (0.0 to 1.0). Set > 0 to enable.
-- **--noise-suppression**: Enable Speex noise suppression (Linux only).
-- **--api-base-url**: Base URL of the local API server that handles `/trigger` and `/stop-tts`.
-- **--api-timeout**: Timeout in seconds for the `/trigger` API call (default: 120.0).
-
-You can also set `API_BASE_URL` as an environment variable. By default it uses `http://localhost:<PORT>`, where `PORT` is read from environment (default: `8000`).
-
-#### Examples
-
-```bash
-python main.py --model-name=hey_jarvis --threshold=0.5 --silence-timeout=1.0 --max-duration=30.0 --ww-vad-threshold=0.01 --noise-suppression=False
-```
-
-```bash
-PORT=8010 python server.py
-API_BASE_URL=http://localhost:8010 python main.py
-```
-
-```bash
-python main.py --help
-```
+- `OpenCode Error: [Errno 111] Connection refused`
+  - OpenCode server is not running at `OPENCODE_URL`.
+- `ERROR: TEST_OPENCODE_DIR does not exist`
+  - Set `TEST_OPENCODE_DIR` in `.env` to a valid existing directory.
+- `NoSuchFile ... silero_vad.onnx`
+  - Run the one-time model download command above.
+- `tflite-runtime ... cp313`
+  - Recreate the environment with Python `3.11`.

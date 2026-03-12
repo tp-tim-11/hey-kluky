@@ -1,4 +1,5 @@
 import typer
+from hey_kluky.config import config
 from hey_kluky.orchestrator import run_voice, run_text
 
 app = typer.Typer()
@@ -6,15 +7,27 @@ app = typer.Typer()
 
 @app.command()
 def main(
-    text: str | None = typer.Option(None, help="Run pipeline once with text input (skip wakeword + STT)."),
-    model_name: str = typer.Option("hey-kluky", help="The wake word model to use."),
+    text: str | None = typer.Option(
+        None, help="Run pipeline once with text input (skip wakeword + STT)."
+    ),
+    model_name: str = typer.Option(
+        config.WAKEWORD_MODEL_NAME, help="The wake word model to use."
+    ),
     threshold: float = typer.Option(0.5, help="Confidence threshold (0.0 to 1.0)."),
-    silence_timeout: float = typer.Option(2.0, help="Seconds of silence to stop recording."),
-    max_duration: float = typer.Option(60.0, help="Maximum recording duration in seconds."),
-    ww_vad_threshold: float = typer.Option(0.01, help="VAD threshold for wake word detection."),
-    noise_suppression: bool = typer.Option(False, help="Enable Speex noise suppression (Linux only)."),
-    api_host: str = typer.Option("0.0.0.0", help="API server host."),
-    api_port: int = typer.Option(8321, help="API server port."),
+    silence_timeout: float = typer.Option(
+        2.0, help="Seconds of silence to stop recording."
+    ),
+    max_duration: float = typer.Option(
+        60.0, help="Maximum recording duration in seconds."
+    ),
+    ww_vad_threshold: float = typer.Option(
+        0.01, help="VAD threshold for wake word detection."
+    ),
+    noise_suppression: bool = typer.Option(
+        False, help="Enable Speex noise suppression (Linux only)."
+    ),
+    api_host: str = typer.Option(config.API_HOST, help="API server host."),
+    api_port: int = typer.Option(config.API_PORT, help="API server port."),
 ):
     if text:
         response = run_text(text)

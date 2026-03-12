@@ -1,4 +1,5 @@
 import threading
+import traceback
 
 from fastapi import APIRouter, FastAPI, HTTPException
 from pydantic import BaseModel
@@ -22,12 +23,16 @@ class SpeakRequest(BaseModel):
 
 def speak_in_background(text: str):
     """Run TTS in a background thread so it doesn't block the caller."""
+
     def _run():
         try:
             with _tts_lock:
                 tts.speak(text)
         except Exception as e:
-            print(f"TTS Error: {e}")
+            print("TTS Error while speaking response:", flush=True)
+            print(f"  text: {text[:200]!r}", flush=True)
+            print(f"  error: {e!r}", flush=True)
+            traceback.print_exc()
 
     thread = threading.Thread(target=_run, daemon=True)
     thread.start()
