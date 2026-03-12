@@ -31,6 +31,62 @@ pid_running() {
   kill -0 "$pid" 2>/dev/null
 }
 
+install_google_sync_cron() {
+  local project_dir="/home/adamveres/Projects/team-project/google_workspace_sync"
+  local log_dir="${project_dir}/logs"
+  local mark_start="# >>> google-workspace-sync (managed) >>>"
+  local mark_end="# <<< google-workspace-sync (managed) <<<"
+
+  if [[ ! -d "${project_dir}" ]]; then
+    echo "ERROR: google_workspace_sync directory not found: ${project_dir}"
+    return 1
+  fi
+
+  mkdir -p "${log_dir}"
+
+  local uv_bin
+  local flock_bin
+  local bash_bin
+  uv_bin="$(command -v uv)"
+  flock_bin="$(command -v flock)"
+  bash_bin="$(command -v bash)"
+
+  local inner
+  inner="cd \"${project_dir}\" && \"${uv_bin}\" run google-workspace-sync sync --mode all >> \"${log_dir}/all-sync.log\" 2>&1"
+
+  local cron_line
+  cron_line="*/5 * * * * ${flock_bin} -n /tmp/gws_all.lock ${bash_bin} -lc '${inner}'"
+
+  local managed_block
+  managed_block="${mark_start}
+# Managed by hey-kluky/start_all.sh
+${cron_line}
+${mark_end}"
+
+  local existing
+  existing="$(crontab -l 2>/dev/null || true)"
+
+  local cleaned
+  cleaned="$(printf '%s\n' "${existing}" | awk -v s="${mark_start}" -v e="${mark_end}" '
+    $0 == s {skip=1; next}
+    $0 == e {skip=0; next}
+    !skip {print}
+  ')"
+
+  local new_crontab
+  if [[ -n "${cleaned}" ]]; then
+    new_crontab="${cleaned}
+${managed_block}
+"
+  else
+    new_crontab="${managed_block}
+"
+  fi
+
+  printf '%s' "${new_crontab}" | crontab -
+  echo "Installed managed cron: google-workspace-sync sync --mode all every 5 minutes."
+}
+
 load_settings() {
   uv run python - <<'PY'
 from pathlib import Path
@@ -80,6 +136,8 @@ fi
 need_cmd uv
 need_cmd opencode
 need_cmd ss
+need_cmd crontab
+need_cmd flock
 
 settings_output="$(
   cd "$ROOT"
@@ -99,6 +157,8 @@ if [[ -z "${TEST_OPENCODE_DIR:-}" || -z "${OPENCODE_URL:-}" || -z "${OPENCODE_HO
   echo "Failed to load required settings from .env"
   exit 1
 fi
+
+install_google_sync_cron
 
 OPENCODE_STARTED=0
 OPENCODE_PID=""

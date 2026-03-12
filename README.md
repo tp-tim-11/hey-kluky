@@ -58,8 +58,9 @@ chmod +x start_all.sh end_all.sh
 
 1. loads settings from `.env` through `hey_kluky/config.py` (pydantic-settings)
 2. validates `TEST_OPENCODE_DIR`
-3. starts `opencode serve` (or reuses existing server on `OPENCODE_URL` port)
-4. runs `uv run python main.py` in foreground (live logs in your terminal)
+3. installs managed cron for `google-workspace-sync sync --mode all` every 5 minutes
+4. starts `opencode serve` (or reuses existing server on `OPENCODE_URL` port)
+5. runs `uv run python main.py` in foreground (live logs in your terminal)
 
 Logs:
 
@@ -72,6 +73,8 @@ Stop managed OpenCode process from PID file:
 ```bash
 ./end_all.sh
 ```
+
+`end_all.sh` also removes the managed `google-workspace-sync` cron block.
 
 ## Manual run (without helper scripts)
 
