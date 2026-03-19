@@ -2,13 +2,28 @@ from pathlib import Path
 
 from hey_kluky.config import config
 from hey_kluky.pipeline import stt, opencode, tts
-from hey_kluky.api import start_server, take_pending_session
+from hey_kluky.pipeline.timer import timer
+from hey_kluky.api import start_server, take_pending_session, wait_for_tts
 
 
-def run_text(text: str):
-    """Run the pipeline once with text input."""
+def run_text(
+    text: str,
+    api_host: str = config.API_HOST,
+    api_port: int = config.API_PORT,
+):
+    """Run the pipeline once with text input — same as voice mode but without wakeword + STT."""
+    start_server(api_host, api_port)
+
     session_id = None
+    timer.start_cycle()
+    tts.play_wait_music()
+    timer.start("LLM")
     session_id, response = _process(text, session_id)
+
+    # Wait for TTS to finish (triggered via /v1/speak endpoint)
+    wait_for_tts()
+    timer.print_summary()
+
     return response
 
 
@@ -39,6 +54,8 @@ def run_voice(
 
     try:
         while True:
+            timer.start_cycle()
+            timer.start("Wakeword")
             wait_for_wakeword(recorder, model, model_name, threshold)
             tts.stop()
 
@@ -48,9 +65,11 @@ def run_voice(
                 session_id = pending
                 print(f"New session from API: {session_id}")
 
+            timer.start("Recording")
             audio_bytes = record_until_silence(
                 recorder, silence_timeout, max_duration)
 
+            timer.start("STT")
             try:
                 text = stt.transcribe(audio_bytes)
             except Exception as e:
@@ -64,8 +83,13 @@ def run_voice(
                 continue
 
             print(f"Transcription: {text}")
+            tts.play_wait_music()
+            timer.start("LLM")
             session_id, response = _process(text, session_id)
 
+            # Wait for TTS (runs in background thread via API)
+            wait_for_tts()
+            timer.print_summary()
             print(f"Listening for '{model_name}'... (Ctrl+C to stop)")
 
     except KeyboardInterrupt:
