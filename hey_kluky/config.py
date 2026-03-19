@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_API_BASE: str = ""
 
-    WHISPER_MODEL: str = "whisper-1"
+    WHISPER_MODEL: str = "whisper-fiit"
     WHISPER_LANGUAGE: str = "sk"
 
     OPENCODE_URL: str = "http://localhost:4096"
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     TEST_OPENCODE_DIR: str = "./test_opencode"
 
     API_HOST: str = "0.0.0.0"
-    API_PORT: int = 8000
+    API_PORT: int = 8321
 
     WAKEWORD_MODEL_NAME: str = "hey_kluky"
     ELEVENLABS_API_KEY: str = ""

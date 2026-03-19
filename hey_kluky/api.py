@@ -40,9 +40,31 @@ def speak_in_background(text: str):
 
 @v1.post("/speak")
 def speak(req: SpeakRequest):
+    print("API /speak called with text:", req.text, flush=True)
     if _tts_lock.locked():
         raise HTTPException(status_code=409, detail="TTS is already playing")
+    tts.stop()  # stop wait music (or anything else playing)
     speak_in_background(req.text)
+    return {"status": "ok"}
+
+
+@v1.get("/last_user_message")
+def last_user_message():
+    """Stop wait music and replay the last cached TTS audio."""
+    if _tts_lock.locked():
+        raise HTTPException(status_code=409, detail="TTS is already playing")
+    tts.stop()
+
+    def _run():
+        try:
+            with _tts_lock:
+                tts.play_cached()
+        except Exception as e:
+            print(f"TTS replay error: {e!r}", flush=True)
+            traceback.print_exc()
+
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
     return {"status": "ok"}
 
 
@@ -57,6 +79,12 @@ def new_session():
     with _session_lock:
         _pending_session_id = sid
     return {"status": "ok"}
+
+
+def wait_for_tts():
+    """Block until TTS background thread finishes."""
+    with _tts_lock:
+        pass
 
 
 def take_pending_session() -> str | None:

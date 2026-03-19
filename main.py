@@ -30,7 +30,7 @@ def main(
     api_port: int = typer.Option(config.API_PORT, help="API server port."),
 ):
     if text:
-        response = run_text(text)
+        response = run_text(text, api_host=api_host, api_port=api_port)
         if response:
             print(f"Response: {response}")
     else:
