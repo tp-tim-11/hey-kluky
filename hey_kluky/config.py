@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     ELEVENLABS_API_KEY: str = ""
     ELEVENLABS_VOICE_ID: str = "pNInz6obpgDQGcFmaJgB"
     ELEVENLABS_MODEL_ID: str = "eleven_turbo_v2_5"
+    ELEVENLABS_STT_MODEL_ID: str = "scribe_v1"
 
     @classmethod
     def validate(self) -> bool:

@@ -9,9 +9,9 @@ from ..config import config
 
 _client: ElevenLabs | None = None
 
-_CACHE_DIR = Path(__file__).resolve().parent.parent / "tts_cache"
+_CACHE_DIR = Path(__file__).resolve().parent.parent / "/sounds/tts_cache"
 _LAST_CACHE_PATH = _CACHE_DIR / "last.mp3"
-_WAIT_MUSIC_DIR = Path(__file__).resolve().parent.parent / "tts_wait_music"
+_WAIT_MUSIC_DIR = Path(__file__).resolve().parent.parent / "/sounds/tts_wait_music"
 
 _last_audio_bytes: bytes | None = None
 
