@@ -59,10 +59,19 @@ def speak(text: str):
 
 
 def play_wait_music():
-    """Play a random mp3 from the wait music folder (non-blocking) while LLM is thinking."""
+    """Play na_bicykle.mp3 first, then a random mp3 from the wait music folder (non-blocking) while LLM is thinking."""
     import random
 
     try:
+        # Play na_bicykle.mp3 before wait music
+        na_bicykle_path = _SOUNDS_DIR / "na_bicykle.mp3"
+        if na_bicykle_path.exists():
+            samples, samplerate = sf.read(str(na_bicykle_path))
+            sd.play(samples, samplerate=samplerate)
+            sd.wait()
+        else:
+            print("na_bicykle.mp3 not found in sounds", flush=True)
+
         files = list(_WAIT_MUSIC_DIR.glob("*.mp3"))
         if not files:
             print("No wait music files found", flush=True)
