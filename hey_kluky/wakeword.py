@@ -16,8 +16,8 @@ def init_wakeword(
     ww_vad_threshold: float = 0.01,
     noise_suppression: bool = False,
 ) -> tuple[PvRecorder, Model]:
-    print("Loading models... (this might take a moment first time)")
-    # openwakeword.utils.download_models(model_names=[model_name])
+    print("Loading models... (this might take a moment the first time)")
+    openwakeword.utils.download_models(model_names=[model_name])
 
     # model = Model(
     #     wakeword_models=[model_name],

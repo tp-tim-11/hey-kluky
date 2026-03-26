@@ -37,6 +37,35 @@ Common optional values:
 - `API_HOST`, `API_PORT`
 - `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL_ID`
 
+## OpenCode login for FIIT provider
+
+If your `opencode.json` already contains a custom provider with id `fiit`, connect credentials once:
+
+```bash
+opencode providers login
+```
+
+Then in the interactive prompt:
+
+1. choose `Other`
+2. enter provider id: `fiit`
+3. paste your FIIT API key
+
+Verify credentials are stored:
+
+```bash
+opencode providers list
+```
+
+Set these in `.env` to make `hey-kluky` use that provider:
+
+- `OPENCODE_PROVIDER_ID=fiit`
+- `OPENCODE_MODEL_ID=<your-fiit-model-id>` (for example `gpt-5-fiit`)
+
+If your STT backend is the same endpoint, you can also set:
+
+- `OPENAI_API_BASE=<your-fiit-base-url>/v1`
+
 ## One-time model download (openwakeword assets)
 
 If you see missing model files such as `silero_vad.onnx`, run:
