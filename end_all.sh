@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUN_DIR="$ROOT/.run"
 
 OPENCODE_PID_FILE="$RUN_DIR/opencode.pid"
+SHEET_PUSH_PID_FILE="$RUN_DIR/sheet_push_watch.pid"
 
 need_cmd() {
   command -v "$1" >/dev/null 2>&1
@@ -89,6 +90,7 @@ stop_pid_from_file() {
 echo "Stopping hey-kluky managed processes..."
 
 stop_pid_from_file "$OPENCODE_PID_FILE" "OpenCode server"
+stop_pid_from_file "$SHEET_PUSH_PID_FILE" "Sheet push watcher"
 if need_cmd crontab; then
   remove_google_sync_cron
 else

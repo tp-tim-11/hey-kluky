@@ -1,6 +1,10 @@
 """Application settings."""
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_ENV_FILE = Path(__file__).parent.parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -18,6 +22,8 @@ class Settings(BaseSettings):
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8321
 
+    GOOGLE_WORKSPACE_SYNC_DIR: str = ""
+
     WAKEWORD_MODEL_NAME: str = "hey_kluky"
     ELEVENLABS_API_KEY: str = ""
     ELEVENLABS_VOICE_ID: str = "pNInz6obpgDQGcFmaJgB"
@@ -31,7 +37,7 @@ class Settings(BaseSettings):
             return False
         return True
 
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_ENV_FILE, env_prefix="", extra="ignore")
 
 
 config = Settings()
