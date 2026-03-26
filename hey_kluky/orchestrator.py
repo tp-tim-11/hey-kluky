@@ -87,7 +87,7 @@ def run_voice(
             tts.play_wait_music()
             timer.start("LLM")
             session_id, response = _process(text, session_id)
-            
+            tts.stop()
             # Wait for TTS (runs in background thread via API)
             wait_for_tts()
             timer.print_summary()
