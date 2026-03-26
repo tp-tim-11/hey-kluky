@@ -143,7 +143,8 @@ Common options:
 - `--api-host`, `--api-port`: internal FastAPI server used by the app
 
 ## Troubleshooting
-
+- if tflite is not available and onnx model is not present, convert tflite to onnx model using: 
+  - uv run --with tf2onnx --with tensorflow python -m tf2onnx.convert --tflite wakeword_model/hey_Klooky.tflite --output wakeword_model/hey_Klooky.onnx --opset 13
 - `OpenCode Error: [Errno 111] Connection refused`
   - OpenCode server is not running at `OPENCODE_URL`.
 - `ERROR: TEST_OPENCODE_DIR does not exist`

@@ -26,8 +26,8 @@ def init_wakeword(
     # )
 
     model = Model(
-        wakeword_models=["wakeword_model/hey_Klooky.tflite"],
-        inference_framework="tflite",
+        wakeword_models=["wakeword_model/hey_Klooky.onnx"],
+        inference_framework="onnx",
         vad_threshold=ww_vad_threshold if ww_vad_threshold > 0 else None,
         enable_speex_noise_suppression=noise_suppression,
     )
