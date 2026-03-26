@@ -58,6 +58,7 @@ def run_voice(
             timer.start("Wakeword")
             wait_for_wakeword(recorder, model, model_name, threshold)
             tts.stop()
+            tts.play_confirmation()
 
             # Check if the API created a new session
             pending = take_pending_session()
@@ -86,7 +87,7 @@ def run_voice(
             tts.play_wait_music()
             timer.start("LLM")
             session_id, response = _process(text, session_id)
-
+            
             # Wait for TTS (runs in background thread via API)
             wait_for_tts()
             timer.print_summary()

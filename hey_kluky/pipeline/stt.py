@@ -1,28 +1,24 @@
 import io
 
-from openai import OpenAI
+from elevenlabs import ElevenLabs
 
 from hey_kluky.config import config
 
 
-def _get_client() -> OpenAI:
-    kwargs = {"api_key": config.OPENAI_API_KEY}
-    if config.OPENAI_API_BASE:
-        kwargs["base_url"] = config.OPENAI_API_BASE
-    return OpenAI(**kwargs)
+def _get_client() -> ElevenLabs:
+    if not config.ELEVENLABS_API_KEY:
+        raise RuntimeError("ELEVENLABS_API_KEY not configured")
+    return ElevenLabs(api_key=config.ELEVENLABS_API_KEY)
 
 
 def transcribe(audio_bytes: bytes) -> str:
-    if not config.OPENAI_API_KEY:
-        raise RuntimeError("OPENAI_API_KEY not configured")
-
     client = _get_client()
     audio_buffer = io.BytesIO(audio_bytes)
     audio_buffer.name = "audio.wav"
 
-    result = client.audio.transcriptions.create(
-        model=config.WHISPER_MODEL,
+    result = client.speech_to_text.convert(
         file=audio_buffer,
-        language=config.WHISPER_LANGUAGE,
+        model_id=config.ELEVENLABS_STT_MODEL_ID,
+        language_code=config.WHISPER_LANGUAGE,
     )
     return result.text

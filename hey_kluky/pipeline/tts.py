@@ -9,9 +9,11 @@ from ..config import config
 
 _client: ElevenLabs | None = None
 
-_CACHE_DIR = Path(__file__).resolve().parent.parent / "tts_cache"
+_SOUNDS_DIR = Path(__file__).resolve().parent.parent / "sounds"
+_CACHE_DIR = _SOUNDS_DIR / "tts_cache"
 _LAST_CACHE_PATH = _CACHE_DIR / "last.mp3"
-_WAIT_MUSIC_DIR = Path(__file__).resolve().parent.parent / "tts_wait_music"
+_WAIT_MUSIC_DIR = _SOUNDS_DIR / "tts_wait_music"
+_CONFIRMATION_PATH = _SOUNDS_DIR / "confirmation.mp3"
 
 _last_audio_bytes: bytes | None = None
 
@@ -70,6 +72,19 @@ def play_wait_music():
         sd.play(samples, samplerate=samplerate)
     except Exception as e:
         print(f"Could not play wait music: {e}", flush=True)
+
+
+def play_confirmation():
+    """Play the confirmation sound after wakeword detection (blocking)."""
+    try:
+        if not _CONFIRMATION_PATH.exists():
+            print("No confirmation sound found", flush=True)
+            return
+        samples, samplerate = sf.read(str(_CONFIRMATION_PATH))
+        sd.play(samples, samplerate=samplerate)
+        sd.wait()
+    except Exception as e:
+        print(f"Could not play confirmation sound: {e}", flush=True)
 
 
 def play_cached():
