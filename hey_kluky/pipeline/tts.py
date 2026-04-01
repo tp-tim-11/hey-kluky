@@ -13,9 +13,10 @@ _SOUNDS_DIR = Path(__file__).resolve().parent.parent / "sounds"
 _CACHE_DIR = _SOUNDS_DIR / "tts_cache"
 _LAST_CACHE_PATH = _CACHE_DIR / "last.mp3"
 _WAIT_MUSIC_DIR = _SOUNDS_DIR / "tts_wait_music"
-_CONFIRMATION_PATH = _SOUNDS_DIR / "confirmation.mp3"
+_CONFIRMATION_PATH = _SOUNDS_DIR / "discord-notification.mp3"
 
 _last_audio_bytes: bytes | None = None
+_wait_music_playing: bool = False
 
 
 def _get_client() -> ElevenLabs:
@@ -60,9 +61,11 @@ def speak(text: str):
 
 def play_wait_music():
     """Play na_bicykle.mp3 first, then a random mp3 from the wait music folder (non-blocking) while LLM is thinking."""
+    global _wait_music_playing
     import random
 
     try:
+        _wait_music_playing = True
         # Play na_bicykle.mp3 before wait music
         na_bicykle_path = _SOUNDS_DIR / "na_bicykle.mp3"
         if na_bicykle_path.exists():
@@ -75,11 +78,13 @@ def play_wait_music():
         files = list(_WAIT_MUSIC_DIR.glob("*.mp3"))
         if not files:
             print("No wait music files found", flush=True)
+            _wait_music_playing = False
             return
         path = random.choice(files)
         samples, samplerate = sf.read(str(path))
         sd.play(samples, samplerate=samplerate)
     except Exception as e:
+        _wait_music_playing = False
         print(f"Could not play wait music: {e}", flush=True)
 
 
@@ -105,5 +110,15 @@ def play_cached():
     sd.wait()
 
 
+def stop_wait_music():
+    """Stop only the wait music, not TTS speech."""
+    global _wait_music_playing
+    if _wait_music_playing:
+        sd.stop()
+        _wait_music_playing = False
+
+
 def stop():
+    global _wait_music_playing
+    _wait_music_playing = False
     sd.stop()

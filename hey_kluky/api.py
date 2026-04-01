@@ -81,6 +81,11 @@ def new_session():
     return {"status": "ok"}
 
 
+def is_tts_playing() -> bool:
+    """Check if TTS is currently playing."""
+    return _tts_lock.locked()
+
+
 def wait_for_tts():
     """Block until TTS background thread finishes."""
     with _tts_lock:

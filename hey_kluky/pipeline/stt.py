@@ -19,6 +19,6 @@ def transcribe(audio_bytes: bytes) -> str:
     result = client.speech_to_text.convert(
         file=audio_buffer,
         model_id=config.ELEVENLABS_STT_MODEL_ID,
-        language_code=config.WHISPER_LANGUAGE,
+        language_code=config.STT_LANGUAGE,
     )
     return result.text

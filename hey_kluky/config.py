@@ -4,15 +4,11 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-_ENV_FILE = Path(__file__).parent.parent.parent / ".env"
+_ENV_FILE = Path(__file__).parent.parent / ".env"
 
 
 class Settings(BaseSettings):
-    OPENAI_API_KEY: str = ""
-    OPENAI_API_BASE: str = ""
-
-    WHISPER_MODEL: str = "whisper-fiit"
-    WHISPER_LANGUAGE: str = "sk"
+    STT_LANGUAGE: str = "sk"
 
     OPENCODE_URL: str = "http://localhost:4096"
     OPENCODE_PROVIDER_ID: str = "github-copilot"
@@ -32,8 +28,8 @@ class Settings(BaseSettings):
 
     @classmethod
     def validate(self) -> bool:
-        if not self.OPENAI_API_KEY:
-            print("Warning: OPENAI_API_KEY not set in environment or .env file")
+        if not self.ELEVENLABS_API_KEY:
+            print("Warning: ELEVENLABS_API_KEY not set in environment or .env file")
             return False
         return True
 
