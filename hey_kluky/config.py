@@ -11,8 +11,6 @@ class Settings(BaseSettings):
     STT_LANGUAGE: str = "sk"
 
     OPENCODE_URL: str = "http://localhost:4096"
-    OPENCODE_PROVIDER_ID: str = "github-copilot"
-    OPENCODE_MODEL_ID: str = "gpt-4.1"
     TEST_OPENCODE_DIR: str = "./test_opencode"
 
     API_HOST: str = "0.0.0.0"

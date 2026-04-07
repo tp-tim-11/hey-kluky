@@ -19,10 +19,6 @@ def send_message(text: str, directory: str, session_id: str | None = None) -> tu
 
     payload = {
         "directory": directory,
-        "model": {
-            "providerID": config.OPENCODE_PROVIDER_ID,
-            "modelID": config.OPENCODE_MODEL_ID,
-        },
         "mode": "plan",
         "parts": [{"type": "text", "text": text}],
     }
