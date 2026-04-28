@@ -20,5 +20,6 @@ def transcribe(audio_bytes: bytes) -> str:
         file=audio_buffer,
         model_id=config.ELEVENLABS_STT_MODEL_ID,
         language_code=config.STT_LANGUAGE,
+        tag_audio_events=False,
     )
     return result.text
