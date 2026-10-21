@@ -40,6 +40,7 @@ def speak(text: str):
             text=text,
             voice_id=config.ELEVENLABS_VOICE_ID,
             model_id=config.ELEVENLABS_MODEL_ID,
+            language_code=config.TTS_LANGUAGE,
             output_format="mp3_44100_128",
         )
         audio_bytes = b"".join(audio_generator)

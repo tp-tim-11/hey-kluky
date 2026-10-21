@@ -9,6 +9,7 @@ _ENV_FILE = Path(__file__).parent.parent / ".env"
 
 class Settings(BaseSettings):
     STT_LANGUAGE: str = "sk"
+    TTS_LANGUAGE: str = "sk"
 
     OPENCODE_URL: str = "http://localhost:4096"
     TEST_OPENCODE_DIR: str = "./test_opencode"
@@ -20,8 +21,8 @@ class Settings(BaseSettings):
 
     WAKEWORD_MODEL_NAME: str = "hey_kluky"
     ELEVENLABS_API_KEY: str = ""
-    ELEVENLABS_VOICE_ID: str = "pNInz6obpgDQGcFmaJgB"
-    ELEVENLABS_MODEL_ID: str = "eleven_turbo_v2_5"
+    ELEVENLABS_VOICE_ID: str = "Gbg7vqyL0sYjsoEqVw0j"
+    ELEVENLABS_MODEL_ID: str = "eleven_v4_turbo"
     ELEVENLABS_STT_MODEL_ID: str = "scribe_v1"
 
     @classmethod
